@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Hospital.Services
 {
-    public interface IRoomService
+    public interface IContactService
     {
-        PagedResult<RoomViewModel> GetAll(int pageNumber, int pageSize);
-        RoomViewModel GetRoomById(int RoomId);
-        void UpdateRoom(RoomViewModel room);
-        void InsertRoom(RoomViewModel room);
-        void DeleteRoom(int id);
+        PagedResult<ContactViewModel> GetAll(int pageNumber, int pageSize);
+        ContactViewModel GetContactById(int ContactId);
+        void UpdateContact(ContactViewModel Contact);
+        void InsertContact(ContactViewModel Contact);
+        void DeleteContact(int id);
     }
 }
