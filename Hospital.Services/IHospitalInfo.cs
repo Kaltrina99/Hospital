@@ -1,5 +1,6 @@
 ﻿using Hospital.ViewModels;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,6 @@ namespace Hospital.Services
         void UpdateHospitalInfo(HospitalInfoViewModel hospitalInfo);
         void InsertHospitalInfo(HospitalInfoViewModel hospitalInfo);
         void DeleteHospitalInfo(int id);
-
+        IEnumerable GetAll();
     }
 }

@@ -2,6 +2,7 @@
 using Hospital.Repositories.Interfaces;
 using Hospital.ViewModels;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -81,6 +82,11 @@ namespace Hospital.Services
            var model=_unitOfWork.GenericRepository<HospitalInfo>().GetById(id);
             _unitOfWork.GenericRepository<HospitalInfo>().Delete(model);
             _unitOfWork.Save();
+        }
+
+        public IEnumerable GetAll()
+        {
+           return _unitOfWork.GenericRepository<HospitalInfo>().GetAll();
         }
     }
 }
