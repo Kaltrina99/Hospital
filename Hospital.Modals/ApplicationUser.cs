@@ -11,6 +11,7 @@ namespace Hospital.Modals
     public class ApplicationUser:IdentityUser
     {
         public string Name { get; set; }
+        public string City { get; set; }
         public Gender Gender { get; set; }
         public string Nationality { get; set; }
         public string Address { get; set; }

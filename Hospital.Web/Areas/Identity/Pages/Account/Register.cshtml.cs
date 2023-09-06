@@ -11,6 +11,7 @@ using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using Hospital.Modals;
+using Hospital.Utilities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,13 +31,15 @@ namespace Hospital.Web.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IWebHostEnvironment _env;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IWebHostEnvironment env)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,8 +47,8 @@ namespace Hospital.Web.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _env = env;
         }
-
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -98,6 +101,12 @@ namespace Hospital.Web.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+            public string Name { get; set; }
+            public Gender Gender { get; set; }
+            public string Nationality { get; set; }
+            public string Address { get; set; }
+            public DateTime DOB { get; set; }
+            public IFormFile PictureUri { get; set; }
         }
 
 
@@ -117,23 +126,57 @@ namespace Hospital.Web.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                user.Email = Input.Email;
+                user.Name = Input.Name;
+                user.Nationality = Input.Nationality;
+                user.DOB = Input.DOB;
+                user.Gender = Input.Gender;
+                //ImageOperations image = new ImageOperations(_env);
+                //string filename =await image.ImageUploadAsync(Input.PictureUri);
+                //user.PictureUri = filename;
+                if (Input.PictureUri != null)
+                {
+                    // Validate and upload profile picture
+                    var imageOperations = new ImageOperations(_env);
+
+                    // Generate a unique file name for the uploaded image
+                    string filename = Guid.NewGuid().ToString() + Path.GetExtension(Input.PictureUri.FileName);
+
+                    if (!imageOperations.IsImageValid(Input.PictureUri))
+                    {
+                        ModelState.AddModelError(string.Empty, "Please upload a valid image file.");
+                        return Page();
+                    }
+
+                    // Save the uploaded image to a directory
+                    string imagePath = await imageOperations.SaveImageAsync(Input.PictureUri, filename);
+
+                    if (string.IsNullOrEmpty(imagePath))
+                    {
+                        ModelState.AddModelError(string.Empty, "An error occurred while saving the image.");
+                        return Page();
+                    }
+
+                    user.PictureUri = imagePath;
+                }
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
-
+                    await _userManager.AddToRoleAsync(user, WebSiteRoles.WebSite_Patient);
                     var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    //var callbackUrl = Url.Page(
+                    //    "/Account/ConfirmEmail",
+                    //    pageHandler: null,
+                    //    values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                    //    protocol: Request.Scheme);
+
+                    //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

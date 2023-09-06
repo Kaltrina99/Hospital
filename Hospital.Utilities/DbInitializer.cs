@@ -24,7 +24,11 @@ namespace Hospital.Utilities
         {
             try
             {
-                _context.Database.Migrate();
+                if (_context.Database.GetPendingMigrations().Count() > 0)
+                {
+                    _context.Database.Migrate();
+                }
+
                 var rez = _roleManager.RoleExistsAsync(WebSiteRoles.WebSite_Admin).Result;
 
                 if (!rez)

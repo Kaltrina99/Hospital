@@ -61,12 +61,6 @@
                 <label asp-for="Input.Specialist"></label>
                 <span asp-validation-for="Input.Specialist" class="text-danger"></span>
             </div>
-
-            <div class="form-check">
-                <input asp-for="Input.IsDoctor" class="form-check-input" />
-                <label class="form-check-label" asp-for="Input.IsDoctor">Are you a doctor?</label>
-            </div>
-
             <div class="form-group">
                 <label asp-for="Input.Gender"></label>
                 <select asp-for="Input.Gender" class="form-control" asp-items="@Html.GetEnumSelectList<Gender>()">
@@ -76,9 +70,9 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="Input.PictureUri"></label>
-                <input asp-for="Input.PictureUri" type="file" class="form-control" />
-                <span asp-validation-for="Input.PictureUri" class="text-danger"></span>
+                <label asp-for="Input.PictureFile"></label>
+                <input asp-for="Input.PictureFile" type="file" class="form-control" />
+                <span asp-validation-for="Input.PictureFile" class="text-danger"></span>
             </div>
 
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>

@@ -31,14 +31,14 @@ namespace Hospital.Web.Areas.Identity.Pages.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
-        private readonly ILogger<RegisterModel> _logger;
+        private readonly ILogger<DoctorRegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly IWebHostEnvironment _env;
         public DoctorRegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<RegisterModel> logger,
+            ILogger<DoctorRegisterModel> logger,
             IEmailSender emailSender,
             IWebHostEnvironment env)
         {
@@ -109,8 +109,9 @@ namespace Hospital.Web.Areas.Identity.Pages.Account
             public string Address { get; set; }
             public DateTime DOB { get; set; }
             public string Specialist { get; set; }
-            public bool IsDoctor { get; set; }
-            public IFormFile PictureUri { get; set; }
+            [Required]
+            [Display(Name = "Profile Picture")]
+            public IFormFile PictureFile { get; set; }
         }
 
 
@@ -135,11 +136,34 @@ namespace Hospital.Web.Areas.Identity.Pages.Account
                 user.Nationality=Input.Nationality;
                 user.DOB = Input.DOB;
                 user.Gender = Input.Gender;
-                user.IsDoctor= Input.IsDoctor;
+                user.IsDoctor= true;
                 user.Specialist = Input.Specialist;
-                ImageOperations image = new ImageOperations(_env);
-                string filename = image.ImageUpload(Input.PictureUri);
-                user.PictureUri = filename;
+                if (Input.PictureFile != null)
+                {
+                    // Validate and upload profile picture
+                    var imageOperations = new ImageOperations(_env);
+
+                    // Generate a unique file name for the uploaded image
+                    string filename = Guid.NewGuid().ToString() + Path.GetExtension(Input.PictureFile.FileName);
+
+                    if (!imageOperations.IsImageValid(Input.PictureFile))
+                    {
+                        ModelState.AddModelError(string.Empty, "Please upload a valid image file.");
+                        return Page();
+                    }
+
+                    // Save the uploaded image to a directory
+                    string imagePath = await imageOperations.SaveImageAsync(Input.PictureFile, filename);
+
+                    if (string.IsNullOrEmpty(imagePath))
+                    {
+                        ModelState.AddModelError(string.Empty, "An error occurred while saving the image.");
+                        return Page();
+                    }
+
+                    user.PictureUri = imagePath;
+                }
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
 
