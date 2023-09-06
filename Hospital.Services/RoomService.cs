@@ -65,7 +65,7 @@ namespace Hospital.Services
             ModelById.RoomNumber = Room.RoomNumber;
             ModelById.Type= Room.Type;
             ModelById.Status = Room.Status;
-            ModelById.HospitalId=ModelById.HospitalId;
+            ModelById.HospitalInfoId=ModelById.HospitalInfoId;
             _unitOfWork.GenericRepository<Room>().Update(ModelById);
             _unitOfWork.Save();
         }

@@ -6,15 +6,17 @@ using Hospital.Repositories.Interfaces;
 using Hospital.Repositories.Implementation;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Hospital.Services;
+using Hospital.Modals;
 
 var builder = WebApplication.CreateBuilder(args);
+var env = builder.Environment;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options=>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<IdentityUser,IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser,IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddScoped<IDbInitializer,DbInitializer>();
@@ -24,6 +26,7 @@ builder.Services.AddTransient<IHospitalInfo, HospitalInfoService>();
 builder.Services.AddTransient<IRoomService, RoomService>();
 builder.Services.AddTransient<IContactService, ContactService>();
 builder.Services.AddRazorPages();
+builder.Services.AddSingleton<IWebHostEnvironment>(env);
 
 
 
